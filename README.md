@@ -52,18 +52,6 @@ mvn clean javafx:run
 - Ensure the project uses JDK 21
 - Right‑click → Run
 
-## Project Structure
-src/
- └── main/
-      ├── java/
-      │    └── com/mycompany/passwordapp/
-      │         ├── App.java
-      │         ├── GeneratorTab.java (optional future refactor)
-      │         └── AnalyzerTab.java (optional future refactor)
-      └── resources/
-
-
-
 ## Common Setup Issues & Fixes
 1. JavaFX fails with “Process exited with error: 1”
 This happens when Maven uses the wrong JDK.

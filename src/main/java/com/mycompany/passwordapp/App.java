@@ -8,7 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -29,6 +31,11 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         
+        // Initialize history to be used by processes
+        TextArea history = new TextArea("History is currently empty");
+        history.setEditable(false);
+        history.setWrapText(true);
+        
         // --- Generator UI ---
         TextField inputLength = new TextField();
         Button generateBtn = new Button("Generate");
@@ -45,8 +52,21 @@ public class App extends Application {
         // Generate password via "Enter" key or button press
         inputLength.setOnAction(event -> generateBtn.fire());
         generateBtn.setOnAction(event -> {
-            String password = PasswordGenerator.generator(Integer.parseInt(inputLength.getText()));
-            outputPassword.setText(password);
+            try{
+                int length = Integer.parseInt(inputLength.getText());
+                String password = PasswordGenerator.generator(length);
+                outputPassword.setText(password);
+                
+                // Add to history
+                String currentText = history.getText();
+                if(currentText.equals("History is currently empty")){
+                    history.setText("Generated:\n\t" + password + "\n");
+                } else{
+                    history.setText(currentText + "Generated:\n\t" + password + "\n");
+                }
+            }catch(NumberFormatException e){
+                outputPassword.setText("Invalid input! Please enter an integer.");
+            }
         });
         
         // Layout for generator tab with padding on edges
@@ -65,24 +85,45 @@ public class App extends Application {
         analyzeBtn.setOnAction(event -> {
             String results = PasswordAnalyzer.analyze(inputPassword.getText());
             outputAnalysis.setText(results);
+            
+            // Add to history
+            String indentedText = results.replace("\n", "\n\t");
+            String currentText = history.getText();
+            if(currentText.equals("History is currently empty")){
+                history.setText("Analysis:\n\t" + indentedText + "\n");
+            } else{
+                history.setText(currentText + "Analysis:\n\t" + indentedText + "\n");
+            }
         });
 
         // Analuzer tab layout, centered, with padding on edges
         VBox analyzerLayout = new VBox(10, inputPassword, analyzeBtn, outputAnalysis);
         analyzerLayout.setAlignment(Pos.TOP_CENTER);
         analyzerLayout.setPadding(new Insets(20));
+        
+        // --- History ---
+        history.setPrefHeight(350);
+        history.setPrefHeight(350);
+        VBox historyLayout = new VBox(10, history);
+        historyLayout.setPadding(new Insets(20));
+        VBox.setVgrow(history, Priority.ALWAYS);
 
         // --- Tabs ---
         Tab generatorTab = new Tab("Generator", generatorLayout);
         Tab analyzerTab = new Tab("Analyzer", analyzerLayout);
+        Tab historyTab = new Tab("History", historyLayout);
         generatorTab.setClosable(false);
         analyzerTab.setClosable(false);
+        historyTab.setClosable(false);
         
-        TabPane tabs = new TabPane(generatorTab, analyzerTab);
+        TabPane tabs = new TabPane(generatorTab, analyzerTab, historyTab);
         
         Scene scene = new Scene(tabs, 400, 400);
-
+        
+        // Create window
         stage.setTitle("Password Tool");
+        stage.setMinHeight(300);
+        stage.setMinWidth(250);
         stage.setScene(scene);
         stage.show();
     }

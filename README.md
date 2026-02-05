@@ -84,7 +84,6 @@ Fix:
 - Strength meter visualization
 - Advanced generator options (symbols, length slider, toggles)
 - Dark mode
-- Password history tab
 - Export/import settings
 
 

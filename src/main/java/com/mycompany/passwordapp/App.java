@@ -43,6 +43,10 @@ public class App extends Application {
         outputPassword.setEditable(false);
         outputPassword.setFocusTraversable(false);
         
+        // Resets input error style when you start typing
+        inputLength.textProperty().addListener((obs, oldVal, newVal) -> {
+            inputLength.setStyle(""); // Clear red border when typing
+        });
         
         inputLength.setPromptText("Enter a length");
         
@@ -52,20 +56,41 @@ public class App extends Application {
         // Generate password via "Enter" key or button press
         inputLength.setOnAction(event -> generateBtn.fire());
         generateBtn.setOnAction(event -> {
-            try{
-                int length = Integer.parseInt(inputLength.getText());
-                String password = PasswordGenerator.generator(length);
-                outputPassword.setText(password);
+            int length = Integer.parseInt(inputLength.getText());
+            
+            if(length > 100){
+                // Add red boarder for too large of a value 
+                inputLength.setStyle("-fx-border-color: red; -fx-border-width: 2;");
                 
-                // Add to history
-                String currentText = history.getText();
-                if(currentText.equals("History is currently empty")){
-                    history.setText("Generated:\n\t" + password + "\n");
-                } else{
-                    history.setText(currentText + "Generated:\n\t" + password + "\n");
+                outputPassword.setText("Invalid input! Value too large. ");
+            }
+            else if(length < 1){
+                // Add red boarder for too small of a value
+                inputLength.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+                
+                outputPassword.setText("Invalid input! Value too small.");
+            }
+            else{
+                try{
+                    // Reset any error styling
+                    inputLength.setStyle("");
+
+                    String password = PasswordGenerator.generator(length);
+                    outputPassword.setText(password);
+
+                    // Add to history
+                    String currentText = history.getText();
+                    if(currentText.equals("History is currently empty")){
+                        history.setText("Generated:\n\t" + password + "\n");
+                    } else{
+                        history.setText(currentText + "Generated:\n\t" + password + "\n");
+                    }
+                }catch(NumberFormatException e){
+                    // Add red boarder for invalid character
+                    inputLength.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+
+                    outputPassword.setText("Invalid input! Please enter a valid integer");
                 }
-            }catch(NumberFormatException e){
-                outputPassword.setText("Invalid input! Please enter an integer.");
             }
         });
         

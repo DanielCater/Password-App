@@ -20,6 +20,7 @@ import javafx.stage.Stage;
  * 
  * A GUI for the password generator and analyzer. It contains tabs for each 
  * function and allows for easy use and copying of the password generated.
+ * There is also a history tab to see past generated and analyzed passwords.
  */
 public class App extends Application {
 
@@ -133,22 +134,45 @@ public class App extends Application {
         historyLayout.setPadding(new Insets(20));
         VBox.setVgrow(history, Priority.ALWAYS);
 
+        // --- Settings ---
+        Button darkModeToggle = new Button("Dark Mode");
+        
+        VBox settingsLayout = new VBox(20, darkModeToggle);
+        settingsLayout.setAlignment(Pos.TOP_CENTER);
+        settingsLayout.setPadding(new Insets(20));
+        
         // --- Tabs ---
         Tab generatorTab = new Tab("Generator", generatorLayout);
         Tab analyzerTab = new Tab("Analyzer", analyzerLayout);
         Tab historyTab = new Tab("History", historyLayout);
+        Tab settingsTab = new Tab("Settings", settingsLayout);
         generatorTab.setClosable(false);
         analyzerTab.setClosable(false);
         historyTab.setClosable(false);
+        settingsTab.setClosable(false);
         
-        TabPane tabs = new TabPane(generatorTab, analyzerTab, historyTab);
+        TabPane tabs = new TabPane(generatorTab, analyzerTab, 
+                               historyTab, settingsTab);
         
         Scene scene = new Scene(tabs, 400, 400);
+        
+        // Toggle light or dark mode on button press
+        darkModeToggle.setOnAction(event -> {
+            if (scene.getStylesheets().isEmpty()) {
+                // Turn on dark mode
+                scene.getStylesheets().add(getClass().getResource("/darkmode.css").toExternalForm());
+                darkModeToggle.setText("Light Mode");
+            } else {
+                // Turn off dark mode
+                scene.getStylesheets().clear();
+                darkModeToggle.setText("Dark Mode");
+            }
+        });
         
         // Create window
         stage.setTitle("Password Tool");
         stage.setMinHeight(300);
-        stage.setMinWidth(250);
+        stage.setMinWidth(300);
         stage.setScene(scene);
         stage.show();
     }

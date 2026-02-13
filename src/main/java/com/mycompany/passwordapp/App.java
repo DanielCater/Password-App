@@ -6,10 +6,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -24,6 +26,23 @@ import javafx.stage.Stage;
  */
 public class App extends Application {
 
+    private int calculateStrength(String password) {
+        int length = password.length();
+        boolean hasUpper = password.matches(".*[A-Z].*");
+        boolean hasLower = password.matches(".*[a-z].*");
+        boolean hasDigit = password.matches(".*\\d.*");
+        boolean hasSpecial = password.matches(".*[!@#$%^&*].*");
+
+        int score = 0;
+        if (length >= 10) score += 10;
+        if (hasUpper) score += 5;
+        if (hasLower) score += 5;
+        if (hasDigit) score += 5;
+        if (hasSpecial) score += 5;
+
+        return score;
+    }
+    
     /**
      * Creates the window for the App and launches it.
      * 
@@ -36,6 +55,11 @@ public class App extends Application {
         TextArea history = new TextArea("History is currently empty");
         history.setEditable(false);
         history.setWrapText(true);
+        
+        // Initialized Strength bar
+        ProgressBar strengthBar = new ProgressBar(0);
+        strengthBar.setPrefWidth(300);
+        Label strengthLabel = new Label("Strength: -");
         
         // --- Generator UI ---
         TextField inputLength = new TextField();
@@ -57,6 +81,14 @@ public class App extends Application {
         // Generate password via "Enter" key or button press
         inputLength.setOnAction(event -> generateBtn.fire());
         generateBtn.setOnAction(event -> {
+            
+            if(inputLength.getText().isEmpty()){
+                // Add red boarder for no input value 
+                inputLength.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+        
+                outputPassword.setText("You must enter a value! ");
+            }
+            
             int length = Integer.parseInt(inputLength.getText());
             
             if(length > 100){
@@ -95,6 +127,14 @@ public class App extends Application {
             }
         });
         
+        inputLength.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("\\d*")) {  // Only digits (0-9)
+                return change;
+            }
+            return null;  // Reject the change
+        }));
+        
         // Layout for generator tab with padding on edges
         VBox generatorLayout = new VBox(10, inputLength, generateBtn, outputPassword);
         generatorLayout.setPadding(new Insets(20));
@@ -121,9 +161,33 @@ public class App extends Application {
                 history.setText(currentText + "Analysis:\n\t" + indentedText + "\n");
             }
         });
+        
+        // Add listener for strength bar
+        inputPassword.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.isEmpty()) {
+                    strengthBar.setProgress(0);
+                    strengthLabel.setText("Strength: -");
+                    strengthBar.setStyle("");
+                    return;
+                }
+
+                int strength = calculateStrength(newVal);
+                strengthBar.setProgress(strength);
+
+                if (strength < 10) {
+                    strengthBar.setStyle("-fx-accent: red;");
+                    strengthLabel.setText("Strength: Weak");
+                } else if (strength < 20) {
+                    strengthBar.setStyle("-fx-accent: orange;");
+                    strengthLabel.setText("Strength: Medium");
+                } else {
+                    strengthBar.setStyle("-fx-accent: green;");
+                    strengthLabel.setText("Strength: Strong");
+                }
+        });
 
         // Analuzer tab layout, centered, with padding on edges
-        VBox analyzerLayout = new VBox(10, inputPassword, analyzeBtn, outputAnalysis);
+        VBox analyzerLayout = new VBox(10, inputPassword, strengthLabel, strengthBar, analyzeBtn, outputAnalysis);
         analyzerLayout.setAlignment(Pos.TOP_CENTER);
         analyzerLayout.setPadding(new Insets(20));
         

@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 
 /**
  * @author Daniel Cater
- * @version 2/4/2026
+ * @version 2/12/2026
  *
  * A simple password generator that creates random passwords containing
  * uppercase letters, lowercase letters, digits, and symbols.
@@ -22,6 +22,10 @@ public class PasswordGenerator {
      * Generates a random password of the specified length.
      *
      * @param length the desired length of the password
+     * @param lower Whether to include lowercase letters
+     * @param upper Whether to include uppercase letters
+     * @param nums Whether to include digits
+     * @param syms Whether to include special symbols
      * @return the generated password
      */
     public static String generator(int length, boolean lower, boolean upper, boolean nums, boolean syms) {

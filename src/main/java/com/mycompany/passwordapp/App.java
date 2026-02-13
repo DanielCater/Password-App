@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 
 /**
  * @author Daniel Cater
- * @version 2/4/2026
+ * @version 2/12/2026
  * 
  * A GUI for the password generator and analyzer. It contains tabs for each 
  * function and allows for easy use and copying of the password generated.
@@ -30,6 +30,12 @@ import javafx.stage.Stage;
  */
 public class App extends Application {
 
+    /**
+     * Helper method to calculate strength for the strength bar.
+     * 
+     * @param password The user's password
+     * @return An integer between 0 and 30 showing strength
+     */
     private int calculateStrength(String password) {
         int length = password.length();
         boolean hasUpper = password.matches(".*[A-Z].*");

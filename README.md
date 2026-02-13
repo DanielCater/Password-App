@@ -69,7 +69,6 @@ Fix:
 - Password: your token
 
 ## Roadmap / Future Features
-- Strength meter visualization
 - Advanced generator options (symbols, length slider, toggles)
 - Export/import settings
 

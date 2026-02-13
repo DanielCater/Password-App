@@ -33,8 +33,8 @@ public class PasswordAnalyzer {
     }
 
     /**
-     * Analyzes the strength of the given password. Total score is out of 40
-     * points: - Length: up to 20 points (1 point per character, max 20) -
+     * Analyzes the strength of the given password. Total score is out of 30
+     * points: - Length: up to 10 points (1 point per character, max 10) -
      * Character Variety: up to 20 points (5 points per unique character type)
      *
      * @param password Password to be analyzed
@@ -61,7 +61,7 @@ public class PasswordAnalyzer {
             }
         }
 
-        int lengthScore = Math.min(password.length(), 20);
+        int lengthScore = Math.min(password.length(), 10);
 
         int totalScore = lengthScore;
         if (hasUpper) {
@@ -78,7 +78,7 @@ public class PasswordAnalyzer {
         }
 
         String result = "Password Analysis:\n";
-        result += "Length Score: " + lengthScore + "/20\n";
+        result += "Length Score: " + lengthScore + "/10\n";
         result += "Contains Uppercase: " + (hasUpper ? "Yes" : "No") + "\n";
         result += "Contains Lowercase: " + (hasLower ? "Yes" : "No") + "\n";
         result += "Contains Digit: " + (hasDigit ? "Yes" : "No") + "\n";

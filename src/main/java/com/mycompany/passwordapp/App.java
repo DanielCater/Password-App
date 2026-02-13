@@ -5,6 +5,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
@@ -12,6 +15,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -63,7 +67,17 @@ public class App extends Application {
         
         // --- Generator UI ---
         TextField inputLength = new TextField();
+        inputLength.setPrefWidth(40);
         Button generateBtn = new Button("Generate");
+        Button copyBtn = new Button("Copy");
+        CheckBox lower = new CheckBox("Lowercase");
+        lower.setSelected(true);
+        CheckBox upper = new CheckBox("Uppercase");
+        upper.setSelected(true);
+        CheckBox nums = new CheckBox("Numbers");
+        nums.setSelected(true);
+        CheckBox symbols = new CheckBox("Symbols");
+        symbols.setSelected(true);
         TextField outputPassword = new TextField();
         outputPassword.setEditable(false);
         outputPassword.setFocusTraversable(false);
@@ -77,6 +91,27 @@ public class App extends Application {
         
         // Center output
         outputPassword.setAlignment(Pos.CENTER);
+        
+        // Allow user to copy password to clipboard
+        copyBtn.setOnAction(event -> {
+            if (!outputPassword.getText().isEmpty()) {
+                Clipboard clipboard = Clipboard.getSystemClipboard();
+                ClipboardContent content = new ClipboardContent();
+                content.putString(outputPassword.getText());
+                clipboard.setContent(content);
+
+                // Tell user text is copied
+                copyBtn.setText("Copied!");
+                
+                // Reset button text after 2 seconds
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000);
+                        javafx.application.Platform.runLater(() -> copyBtn.setText("Copy"));
+                    } catch (InterruptedException e) {}
+                }).start();
+            }
+        });
         
         // Generate password via "Enter" key or button press
         inputLength.setOnAction(event -> generateBtn.fire());
@@ -108,7 +143,8 @@ public class App extends Application {
                     // Reset any error styling
                     inputLength.setStyle("");
 
-                    String password = PasswordGenerator.generator(length);
+                    String password = PasswordGenerator.generator(length, lower.isSelected(), upper.isSelected(), 
+                                                              nums.isSelected(), symbols.isSelected());
                     outputPassword.setText(password);
 
                     // Add to history
@@ -136,7 +172,12 @@ public class App extends Application {
         }));
         
         // Layout for generator tab with padding on edges
-        VBox generatorLayout = new VBox(10, inputLength, generateBtn, outputPassword);
+        HBox checkboxes = new HBox(10, lower, upper, nums, symbols);
+        HBox form = new HBox(10, inputLength, generateBtn, copyBtn);
+        form.setAlignment(Pos.TOP_CENTER);
+        checkboxes.setAlignment(Pos.TOP_CENTER);
+        VBox generatorLayout = new VBox(10, form, checkboxes, outputPassword);
+        generatorLayout.setAlignment(Pos.TOP_CENTER);
         generatorLayout.setPadding(new Insets(20));
 
         // --- Analyzer UI ---
@@ -192,7 +233,6 @@ public class App extends Application {
         analyzerLayout.setPadding(new Insets(20));
         
         // --- History ---
-        history.setPrefHeight(350);
         history.setPrefHeight(350);
         VBox historyLayout = new VBox(10, history);
         historyLayout.setPadding(new Insets(20));

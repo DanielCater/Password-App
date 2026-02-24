@@ -15,9 +15,11 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import static javafx.scene.paint.Color.RED;
 import javafx.stage.Stage;
 
 /**
@@ -54,6 +56,37 @@ public class App extends Application {
     }
     
     /**
+     * Calculates the entropy of the given password. Uses Claude Shannon's 
+     * entropy formula in information theory to calculate about how many times
+     * it would take an attacker to crack the password. (E.g. 60 bits would take
+     * 2^60 attempts)
+     * 
+     * @param password The user's password
+     * @param upper if uppercase is included
+     * @param lower if lowercase is included
+     * @param digits if digits are included
+     * @param special if special characters are included
+     * 
+     * @return The value calculated for entropy.
+     */
+    private double calculateEntropy(String password, boolean upper, boolean lower, 
+                                 boolean digits, boolean special) {
+    if (password.isEmpty()) return 0;
+    
+    // Calculate pool size based on selected character types
+    int poolSize = 0;
+    if (upper) poolSize += 26;
+    if (lower) poolSize += 26;
+    if (digits) poolSize += 10;
+    if (special) poolSize += 25;
+    
+    if (poolSize == 0) return 0;
+    
+    // Entropy = length × log2(poolSize)
+    return password.length() * (Math.log(poolSize) / Math.log(2));
+    }
+    
+    /**
      * Creates the window for the App and launches it.
      * 
      * @param stage The window to be launched
@@ -76,6 +109,8 @@ public class App extends Application {
         inputLength.setPrefWidth(40);
         Button generateBtn = new Button("Generate");
         Button copyBtn = new Button("Copy");
+        Button clearBtn = new Button("Clear");
+        clearBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
         CheckBox lower = new CheckBox("Lowercase");
         lower.setSelected(true);
         CheckBox upper = new CheckBox("Uppercase");
@@ -87,13 +122,14 @@ public class App extends Application {
         TextField outputPassword = new TextField();
         outputPassword.setEditable(false);
         outputPassword.setFocusTraversable(false);
+        Label entropyLabel = new Label("Entropy: 0 bits");
         
         // Resets input error style when you start typing
         inputLength.textProperty().addListener((obs, oldVal, newVal) -> {
             inputLength.setStyle(""); // Clear red border when typing
         });
         
-        inputLength.setPromptText("Enter a length");
+        inputLength.setPromptText("##");
         
         // Center output
         outputPassword.setAlignment(Pos.CENTER);
@@ -117,6 +153,12 @@ public class App extends Application {
                     } catch (InterruptedException e) {}
                 }).start();
             }
+        });
+        
+        clearBtn.setOnAction(event -> {
+            outputPassword.setText("");
+            entropyLabel.setText("Entropy: 0 bits");
+            inputLength.setText("");
         });
         
         // Generate password via "Enter" key or button press
@@ -152,7 +194,10 @@ public class App extends Application {
                     String password = PasswordGenerator.generator(length, lower.isSelected(), upper.isSelected(), 
                                                               nums.isSelected(), symbols.isSelected());
                     outputPassword.setText(password);
-
+                    
+                    double entropy = calculateEntropy(password, upper.isSelected(), 
+                                                 lower.isSelected(), nums.isSelected(), symbols.isSelected());
+                    entropyLabel.setText(String.format("Entropy: %.1f bits", entropy));
                     // Add to history
                     String currentText = history.getText();
                     if(currentText.equals("History is currently empty")){
@@ -179,10 +224,10 @@ public class App extends Application {
         
         // Layout for generator tab with padding on edges
         HBox checkboxes = new HBox(10, lower, upper, nums, symbols);
-        HBox form = new HBox(10, inputLength, generateBtn, copyBtn);
+        HBox form = new HBox(10, inputLength, generateBtn, copyBtn, clearBtn);
         form.setAlignment(Pos.TOP_CENTER);
         checkboxes.setAlignment(Pos.TOP_CENTER);
-        VBox generatorLayout = new VBox(10, form, checkboxes, outputPassword);
+        VBox generatorLayout = new VBox(10, form, checkboxes, outputPassword, entropyLabel);
         generatorLayout.setAlignment(Pos.TOP_CENTER);
         generatorLayout.setPadding(new Insets(20));
 

@@ -69,7 +69,6 @@ Fix:
 - Password: your token
 
 ## Roadmap / Future Features
-- Ensure at least one of each selected character
 - Exclude ambiguous characters
 - Export/import settings
 - Full password manager tab

@@ -164,7 +164,7 @@ public class App extends Application {
         // Generate password via "Enter" key or button press
         inputLength.setOnAction(event -> generateBtn.fire());
         generateBtn.setOnAction(event -> {
-            
+            entropyLabel.setText("Entropy: 0 bits");
             if(inputLength.getText().isEmpty()){
                 // Add red boarder for no input value 
                 inputLength.setStyle("-fx-border-color: red; -fx-border-width: 2;");
@@ -195,9 +195,13 @@ public class App extends Application {
                                                               nums.isSelected(), symbols.isSelected());
                     outputPassword.setText(password);
                     
-                    double entropy = calculateEntropy(password, upper.isSelected(), 
+                    if(!password.equals("Must select character type(s)") && 
+                            !password.equals("Length must be at least the same as number of types selected!")){
+                        double entropy = calculateEntropy(password, upper.isSelected(), 
                                                  lower.isSelected(), nums.isSelected(), symbols.isSelected());
-                    entropyLabel.setText(String.format("Entropy: %.1f bits", entropy));
+                        entropyLabel.setText(String.format("Entropy: %.1f bits", entropy));
+                    }
+                    
                     // Add to history
                     String currentText = history.getText();
                     if(currentText.equals("History is currently empty")){
